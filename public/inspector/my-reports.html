@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Reports — SafeInspect</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="brand-text"><div class="brand-name">SafeInspect</div><div class="brand-sub">Inspector Portal</div></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Navigation</div>
+      <a href="/inspector/dashboard.html" class="nav-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="/inspector/new-report.html" class="nav-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Inspection
+      </a>
+      <a href="/inspector/my-reports.html" class="nav-item active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        My Reports
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sidebarAvatar">?</div>
+        <div class="user-info-text">
+          <div class="user-name" id="sidebarUserName">Loading…</div>
+          <div class="user-role" id="sidebarUserRole">Inspector</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="API.logout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <span class="page-title">My Inspection Reports</span>
+      <div class="top-bar-actions">
+        <a href="/inspector/new-report.html" class="btn btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Inspection
+        </a>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">All Reports</span>
+          <div class="filter-bar" style="margin:0">
+            <div class="search-input-wrap" style="min-width:220px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="searchInput" placeholder="Search reports…">
+            </div>
+            <select class="filter-select" id="statusFilter">
+              <option value="">All Statuses</option>
+              <option value="draft">Draft</option>
+              <option value="submitted">Submitted</option>
+              <option value="under_review">Under Review</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="tableContainer">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Site Name</th>
+                  <th>Type</th>
+                  <th>Inspection Date</th>
+                  <th>Score</th>
+                  <th>Status</th>
+                  <th>Last Updated</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="reportsTable"><tr><td colspan="8" style="text-align:center;padding:40px;color:#64748b">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+let allReports = [];
+
+async function loadReports() {
+  const user = API.requireAuth('inspector');
+  if (!user) return;
+  populateSidebar(user);
+
+  try {
+    allReports = await API.get('/api/reports');
+    renderTable(allReports);
+  } catch (err) {
+    document.getElementById('reportsTable').innerHTML =
+      `<tr><td colspan="8"><div class="alert alert-error" style="margin:16px">Failed to load: ${err.message}</div></td></tr>`;
+  }
+}
+
+function renderTable(reports) {
+  const tbody = document.getElementById('reportsTable');
+  if (reports.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8">
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <h3>No reports found</h3><p>Try adjusting your filters.</p>
+      </div>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = reports.map(r => {
+    const updated = new Date(r.updated_at).toLocaleDateString();
+    const isEditable = r.status === 'draft';
+    return `
+      <tr>
+        <td class="text-muted text-sm">#${r.id}</td>
+        <td>
+          <div class="font-bold">${r.site_name}</div>
+          <div class="text-muted text-sm">${r.site_address}</div>
+        </td>
+        <td class="text-muted">${r.site_type || '—'}</td>
+        <td class="text-muted">${r.inspection_date}</td>
+        <td>${scoreRing(r.score, r.max_score)}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td class="text-muted text-sm">${updated}</td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <a href="/inspector/new-report.html?id=${r.id}" class="btn btn-outline btn-sm">
+            ${isEditable ? 'Edit' : 'View'}
+          </a>
+          ${r.status !== 'draft' ? `<a href="/api/reports/${r.id}/pdf" class="btn btn-sm" style="background:#f1f5f9;border:1.5px solid #e2e8f0" target="_blank">PDF</a>` : ''}
+          ${r.status === 'draft' ? `<button onclick="submitReport(${r.id}, this)" class="btn btn-primary btn-sm">Submit</button>` : ''}
+          ${r.status === 'rejected' ? `<span class="badge badge-rejected" style="font-size:11px">Action Required</span>` : ''}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function submitReport(id, btn) {
+  if (!confirm('Submit this report to the insurance provider? You cannot edit it after submission.')) return;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="inline-spinner"></span>';
+  try {
+    await API.post(`/api/reports/${id}/submit`);
+    toast('Report submitted successfully!', 'success');
+    allReports = await API.get('/api/reports');
+    applyFilters();
+  } catch (err) {
+    toast(err.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Submit';
+  }
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const status = document.getElementById('statusFilter').value;
+  const filtered = allReports.filter(r => {
+    const matchSearch = !search ||
+      r.site_name.toLowerCase().includes(search) ||
+      r.site_address.toLowerCase().includes(search);
+    const matchStatus = !status || r.status === status;
+    return matchSearch && matchStatus;
+  });
+  renderTable(filtered);
+}
+
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('statusFilter').addEventListener('change', applyFilters);
+
+loadReports();
+</script>
+</body>
+</html>

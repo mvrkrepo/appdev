@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Detail — SafeInspect</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="brand-text"><div class="brand-name">SafeInspect</div><div class="brand-sub">Insurance Portal</div></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Navigation</div>
+      <a href="/insurance/dashboard.html" class="nav-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="/insurance/reports.html" class="nav-item active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        All Reports
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sidebarAvatar">SJ</div>
+        <div class="user-info-text">
+          <div class="user-name" id="sidebarUserName">Loading…</div>
+          <div class="user-role" id="sidebarUserRole">Insurance Provider</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="API.logout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <a href="/insurance/reports.html" style="color:var(--text-muted);display:flex;align-items:center;gap:4px;font-size:13px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </a>
+        <span class="page-title" id="pageTitle">Inspection Report</span>
+        <span id="statusBadgeTop"></span>
+      </div>
+      <div class="top-bar-actions">
+        <a id="pdfBtn" href="#" class="btn btn-outline" target="_blank">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Download PDF
+        </a>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <div id="alertBox"></div>
+      <div id="mainContent" style="display:none">
+
+        <!-- Two-column layout -->
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start">
+
+          <!-- LEFT: Inspection details + checklist -->
+          <div>
+
+            <!-- Site Info -->
+            <div class="card" style="margin-bottom:20px">
+              <div class="card-header">
+                <span class="card-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Site Information
+                </span>
+              </div>
+              <div class="card-body">
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <div class="detail-label">Site Name</div>
+                    <div class="detail-value" id="detSiteName">—</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">Site Type</div>
+                    <div class="detail-value" id="detSiteType">—</div>
+                  </div>
+                  <div class="detail-item" style="grid-column:1/-1">
+                    <div class="detail-label">Address</div>
+                    <div class="detail-value" id="detAddress">—</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">Inspection Date</div>
+                    <div class="detail-value" id="detDate">—</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">Submitted</div>
+                    <div class="detail-value" id="detSubmitted">—</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">Inspector</div>
+                    <div class="detail-value" id="detInspector">—</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">Company</div>
+                    <div class="detail-value" id="detCompany">—</div>
+                  </div>
+                  <div class="detail-item" style="grid-column:1/-1">
+                    <div class="detail-label">Inspector Email</div>
+                    <div class="detail-value" id="detEmail">—</div>
+                  </div>
+                </div>
+
+                <!-- Score bar -->
+                <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                    <span class="text-muted text-sm">Overall Compliance Score</span>
+                    <span id="scoreLabel" style="font-weight:800;font-size:16px">—</span>
+                  </div>
+                  <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill green" id="scoreBar" style="width:0%"></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;margin-top:5px">
+                    <span class="text-muted text-sm" id="scoreDetail">—</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Inspector Notes -->
+            <div class="card" id="notesCard" style="margin-bottom:20px;display:none">
+              <div class="card-header">
+                <span class="card-title">Inspector Notes</span>
+              </div>
+              <div class="card-body">
+                <p id="inspectorNotes" style="font-size:13.5px;color:var(--text);line-height:1.6"></p>
+              </div>
+            </div>
+
+            <!-- Checklist -->
+            <div class="card" style="margin-bottom:20px">
+              <div class="card-header">
+                <span class="card-title">Safety Checklist Results</span>
+                <div style="display:flex;gap:10px;font-size:12px">
+                  <span style="color:var(--green);font-weight:600">✓ Compliant</span>
+                  <span style="color:var(--red);font-weight:600">✗ Non-Compliant</span>
+                  <span style="color:#94a3b8;font-weight:600">– N/A</span>
+                </div>
+              </div>
+              <div class="card-body" id="checklistBody" style="padding:12px 20px"></div>
+            </div>
+
+            <!-- Photos -->
+            <div class="card" id="photosCard" style="margin-bottom:20px;display:none">
+              <div class="card-header"><span class="card-title">Photographic Evidence</span></div>
+              <div class="card-body">
+                <div class="photo-grid" id="photoGrid"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Review panel -->
+          <div>
+            <div class="card" style="position:sticky;top:76px">
+              <div class="card-header">
+                <span class="card-title">Insurance Review</span>
+              </div>
+              <div class="card-body">
+
+                <!-- Existing review (if already reviewed) -->
+                <div id="existingReview" class="hidden"></div>
+
+                <!-- Review form -->
+                <div id="reviewForm">
+                  <div class="form-group">
+                    <label style="font-size:13px;font-weight:600">Decision</label>
+                    <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+                      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;font-weight:500;transition:.15s" id="optUnderReview">
+                        <input type="radio" name="decision" value="under_review" onchange="updateDecisionUI()">
+                        <span style="color:var(--amber)">⏳</span> Mark as Under Review
+                      </label>
+                      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;font-weight:500;transition:.15s" id="optApproved">
+                        <input type="radio" name="decision" value="approved" onchange="updateDecisionUI()">
+                        <span style="color:var(--green)">✓</span> Approve Coverage
+                      </label>
+                      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;font-weight:500;transition:.15s" id="optRejected">
+                        <input type="radio" name="decision" value="rejected" onchange="updateDecisionUI()">
+                        <span style="color:var(--red)">✗</span> Reject — Action Required
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label style="font-size:13px;font-weight:600">Review Notes <span style="color:var(--text-muted);font-weight:400">(sent to inspector)</span></label>
+                    <textarea id="reviewNotes" class="form-control" rows="5" placeholder="Add feedback, required corrective actions, or approval conditions…" style="margin-top:6px"></textarea>
+                  </div>
+
+                  <button class="btn btn-primary w-full" id="submitReviewBtn" onclick="submitReview()" disabled>
+                    Submit Decision
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="loadingState" style="text-align:center;padding:80px;color:var(--text-muted)">
+        <div class="spinner" style="margin:0 auto 16px"></div>
+        Loading report…
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="/js/api.js"></script>
+<script>
+const reportId = new URLSearchParams(window.location.search).get('id');
+let report = null;
+
+(async () => {
+  const user = API.requireAuth('insurance');
+  if (!user) return;
+  populateSidebar(user);
+
+  if (!reportId) {
+    window.location.href = '/insurance/reports.html';
+    return;
+  }
+
+  try {
+    report = await API.get(`/api/insurance/reports/${reportId}`);
+    renderReport(report);
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+  } catch (err) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('alertBox').innerHTML = `<div class="alert alert-error">Failed to load report: ${err.message}</div>`;
+  }
+})();
+
+function renderReport(r) {
+  document.getElementById('pageTitle').textContent = `Report #${r.id} — ${r.site_name}`;
+  document.getElementById('statusBadgeTop').innerHTML = statusBadge(r.status);
+  document.getElementById('pdfBtn').href = `/api/insurance/reports/${r.id}/pdf`;
+
+  document.getElementById('detSiteName').textContent = r.site_name;
+  document.getElementById('detSiteType').textContent = r.site_type || '—';
+  document.getElementById('detAddress').textContent = r.site_address;
+  document.getElementById('detDate').textContent = r.inspection_date;
+  document.getElementById('detSubmitted').textContent = r.submitted_at ? new Date(r.submitted_at).toLocaleString() : '—';
+  document.getElementById('detInspector').textContent = r.inspector_name;
+  document.getElementById('detCompany').textContent = r.inspector_company || '—';
+  document.getElementById('detEmail').textContent = r.inspector_email || '—';
+
+  const pct = r.max_score > 0 ? Math.round((r.score / r.max_score) * 100) : 0;
+  const barColor = pct >= 80 ? 'green' : pct >= 60 ? 'amber' : 'red';
+  document.getElementById('scoreLabel').textContent = `${pct}%`;
+  document.getElementById('scoreLabel').style.color = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--red)';
+  document.getElementById('scoreBar').style.width = `${pct}%`;
+  document.getElementById('scoreBar').className = `progress-bar-fill ${barColor}`;
+  document.getElementById('scoreDetail').textContent = `${r.score} of ${r.max_score} applicable items compliant`;
+
+  if (r.notes) {
+    document.getElementById('inspectorNotes').textContent = r.notes;
+    document.getElementById('notesCard').style.display = 'block';
+  }
+
+  // Checklist
+  renderChecklist(r.items || []);
+
+  // Photos
+  if ((r.photos || []).length > 0) {
+    const grid = document.getElementById('photoGrid');
+    r.photos.forEach(photo => {
+      const div = document.createElement('div');
+      div.className = 'photo-thumb';
+      div.innerHTML = `
+        <a href="/uploads/${photo.filename}" target="_blank">
+          <img src="/uploads/${photo.filename}" alt="${photo.original_name}" loading="lazy">
+        </a>
+        <div class="photo-caption">${photo.caption || photo.original_name}</div>
+      `;
+      grid.appendChild(div);
+    });
+    document.getElementById('photosCard').style.display = 'block';
+  }
+
+  // Review panel
+  renderReviewPanel(r);
+}
+
+function renderChecklist(items) {
+  const body = document.getElementById('checklistBody');
+  const byCategory = {};
+  items.forEach(it => { (byCategory[it.category] = byCategory[it.category] || []).push(it); });
+
+  body.innerHTML = Object.entries(byCategory).map(([cat, catItems]) => {
+    const applicable = catItems.filter(i => i.status !== 'na').length;
+    const compliant = catItems.filter(i => i.status === 'compliant').length;
+    const pct = applicable > 0 ? Math.round((compliant / applicable) * 100) : 0;
+    const pillCls = applicable === 0 ? '' : pct >= 80 ? ' high' : pct >= 60 ? ' mid' : ' low';
+
+    return `
+      <div class="checklist-category" style="margin-bottom:10px">
+        <div class="checklist-cat-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'">
+          <span class="checklist-cat-title">${cat}</span>
+          <span class="cat-score-pill${pillCls}">${compliant} / ${applicable}</span>
+        </div>
+        <div class="checklist-items-list">
+          ${catItems.map(it => {
+            const icon = it.status === 'compliant' ? '✓' : it.status === 'non_compliant' ? '✗' : '–';
+            return `
+              <div class="checklist-ro-item">
+                <span class="status-dot ${it.status}">${icon}</span>
+                <div class="ro-item-text">
+                  <div class="ro-item-name">${it.item_name}</div>
+                  ${it.notes ? `<div class="ro-item-note">${it.notes}</div>` : ''}
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderReviewPanel(r) {
+  const reviewForm = document.getElementById('reviewForm');
+  const existingReview = document.getElementById('existingReview');
+
+  if (r.status !== 'submitted') {
+    // Show existing review decision
+    const panelClass = r.status;
+    const icons = { approved: '✓', rejected: '✗', under_review: '⏳' };
+    const labels = { approved: 'Approved', rejected: 'Rejected — Action Required', under_review: 'Under Review' };
+
+    existingReview.innerHTML = `
+      <div class="review-panel ${panelClass}" style="margin-bottom:16px">
+        <div class="review-panel-header">${icons[r.status] || ''} ${labels[r.status] || r.status}</div>
+        <div class="review-panel-body">
+          ${r.reviewer_name ? `<p class="text-muted text-sm" style="margin-bottom:8px">Reviewed by <strong>${r.reviewer_name}</strong>${r.reviewed_at ? ` on ${new Date(r.reviewed_at).toLocaleDateString()}` : ''}</p>` : ''}
+          ${r.insurance_notes ? `<p style="font-size:13.5px">${r.insurance_notes}</p>` : '<p class="text-muted text-sm">No notes recorded.</p>'}
+        </div>
+      </div>
+      <p class="text-muted text-sm" style="margin-bottom:12px">Update this decision:</p>
+    `;
+    existingReview.classList.remove('hidden');
+
+    // Pre-fill the form with existing values
+    const radio = document.querySelector(`input[name="decision"][value="${r.status}"]`);
+    if (radio) { radio.checked = true; updateDecisionUI(); }
+    if (r.insurance_notes) document.getElementById('reviewNotes').value = r.insurance_notes;
+  }
+}
+
+function updateDecisionUI() {
+  const val = document.querySelector('input[name="decision"]:checked')?.value;
+  document.getElementById('submitReviewBtn').disabled = !val;
+
+  // Highlight selected option
+  ['under_review','approved','rejected'].forEach(v => {
+    const el = document.getElementById(`opt${v.charAt(0).toUpperCase() + v.slice(1).replace('_','').replace('r','R')}`);
+  });
+
+  const optMap = { under_review: 'optUnderReview', approved: 'optApproved', rejected: 'optRejected' };
+  Object.entries(optMap).forEach(([v, id]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.borderColor = v === val
+        ? (v === 'approved' ? 'var(--green)' : v === 'rejected' ? 'var(--red)' : 'var(--amber)')
+        : 'var(--border)';
+      el.style.background = v === val
+        ? (v === 'approved' ? 'var(--green-light)' : v === 'rejected' ? 'var(--red-light)' : 'var(--amber-light)')
+        : 'white';
+    }
+  });
+}
+
+async function submitReview() {
+  const status = document.querySelector('input[name="decision"]:checked')?.value;
+  const notes = document.getElementById('reviewNotes').value.trim();
+  if (!status) return;
+
+  const btn = document.getElementById('submitReviewBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="inline-spinner"></span> Submitting…';
+
+  try {
+    await API.put(`/api/insurance/reports/${reportId}/review`, { status, insurance_notes: notes });
+    toast(`Report ${status.replace('_',' ')} successfully.`, 'success');
+    setTimeout(() => window.location.reload(), 1000);
+  } catch (err) {
+    toast(err.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Submit Decision';
+  }
+}
+</script>
+</body>
+</html>

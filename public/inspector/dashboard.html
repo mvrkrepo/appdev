@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inspector Dashboard — SafeInspect</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">SafeInspect</div>
+        <div class="brand-sub">Inspector Portal</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Navigation</div>
+      <a href="/inspector/dashboard.html" class="nav-item active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="/inspector/new-report.html" class="nav-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Inspection
+      </a>
+      <a href="/inspector/my-reports.html" class="nav-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        My Reports
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sidebarAvatar">JC</div>
+        <div class="user-info-text">
+          <div class="user-name" id="sidebarUserName">Loading…</div>
+          <div class="user-role" id="sidebarUserRole">Inspector</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="API.logout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <div class="top-bar">
+      <span class="page-title">Dashboard</span>
+      <div class="top-bar-actions">
+        <a href="/inspector/new-report.html" class="btn btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Inspection
+        </a>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <!-- Stats -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-icon navy"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div class="stat-content"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total Reports</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon gray"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <div class="stat-content"><div class="stat-value" id="statDraft">—</div><div class="stat-label">Drafts</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+          <div class="stat-content"><div class="stat-value" id="statSubmitted">—</div><div class="stat-label">Submitted</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="stat-content"><div class="stat-value" id="statApproved">—</div><div class="stat-label">Approved</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+          <div class="stat-content"><div class="stat-value" id="statRejected">—</div><div class="stat-label">Rejected</div></div>
+        </div>
+      </div>
+
+      <!-- Recent Reports -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Recent Reports
+          </span>
+          <a href="/inspector/my-reports.html" class="btn btn-outline btn-sm">View All</a>
+        </div>
+        <div id="reportsContainer">
+          <div class="empty-state" id="emptyState" style="display:none">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <h3>No reports yet</h3>
+            <p>Start your first safety inspection report.</p>
+            <a href="/inspector/new-report.html" class="btn btn-primary">Start New Inspection</a>
+          </div>
+          <div class="table-wrapper" id="tableWrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Site Name</th>
+                  <th>Type</th>
+                  <th>Date</th>
+                  <th>Score</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="reportsTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+(async () => {
+  const user = API.requireAuth('inspector');
+  if (!user) return;
+  populateSidebar(user);
+
+  try {
+    const reports = await API.get('/api/reports');
+
+    const total = reports.length;
+    const draft = reports.filter(r => r.status === 'draft').length;
+    const submitted = reports.filter(r => r.status === 'submitted').length;
+    const approved = reports.filter(r => r.status === 'approved').length;
+    const rejected = reports.filter(r => r.status === 'rejected').length;
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statDraft').textContent = draft;
+    document.getElementById('statSubmitted').textContent = submitted + reports.filter(r => r.status === 'under_review').length;
+    document.getElementById('statApproved').textContent = approved;
+    document.getElementById('statRejected').textContent = rejected;
+
+    const recent = reports.slice(0, 8);
+
+    if (recent.length === 0) {
+      document.getElementById('tableWrapper').style.display = 'none';
+      document.getElementById('emptyState').style.display = 'block';
+      return;
+    }
+
+    const tbody = document.getElementById('reportsTable');
+    tbody.innerHTML = recent.map(r => `
+      <tr>
+        <td class="text-muted text-sm">#${r.id}</td>
+        <td>
+          <div class="font-bold">${r.site_name}</div>
+          <div class="text-muted text-sm">${r.site_address}</div>
+        </td>
+        <td class="text-muted">${r.site_type || '—'}</td>
+        <td class="text-muted">${r.inspection_date}</td>
+        <td>${scoreRing(r.score, r.max_score)}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td>
+          <a href="/inspector/new-report.html?id=${r.id}" class="btn btn-outline btn-sm" style="margin-right:4px">
+            ${r.status === 'draft' ? 'Edit' : 'View'}
+          </a>
+          ${r.status !== 'draft' ? `<a href="/api/reports/${r.id}/pdf" class="btn btn-sm" style="background:#f1f5f9;border:1.5px solid #e2e8f0" target="_blank">PDF</a>` : ''}
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    document.getElementById('reportsContainer').innerHTML =
+      `<div class="alert alert-error" style="margin:20px">Failed to load reports: ${err.message}</div>`;
+  }
+})();
+</script>
+</body>
+</html>

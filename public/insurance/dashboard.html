@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insurance Dashboard — SafeInspect</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="brand-text"><div class="brand-name">SafeInspect</div><div class="brand-sub">Insurance Portal</div></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Navigation</div>
+      <a href="/insurance/dashboard.html" class="nav-item active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="/insurance/reports.html" class="nav-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        All Reports
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sidebarAvatar">SJ</div>
+        <div class="user-info-text">
+          <div class="user-name" id="sidebarUserName">Loading…</div>
+          <div class="user-role" id="sidebarUserRole">Insurance Provider</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="API.logout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <span class="page-title">Insurance Dashboard</span>
+      <div class="top-bar-actions">
+        <a href="/insurance/reports.html?status=submitted" class="btn btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Pending Review
+          <span id="pendingBadge" style="background:var(--red);color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:2px;display:none"></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon navy"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div class="stat-content"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total Received</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="stat-content"><div class="stat-value" id="statPending">—</div><div class="stat-label">Pending Review</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <div class="stat-content"><div class="stat-value" id="statUnderReview">—</div><div class="stat-label">Under Review</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="stat-content"><div class="stat-value" id="statApproved">—</div><div class="stat-label">Approved</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+          <div class="stat-content"><div class="stat-value" id="statRejected">—</div><div class="stat-label">Rejected</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="stat-content"><div class="stat-value" id="statAvgScore">—</div><div class="stat-label">Avg Compliance</div></div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="charts-grid">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Report Status Distribution</span></div>
+          <div class="card-body"><div class="chart-wrap"><canvas id="statusChart"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Submissions Over Time</span></div>
+          <div class="card-body"><div class="chart-wrap"><canvas id="timeChart"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- Category compliance -->
+      <div class="card" style="margin-bottom:24px">
+        <div class="card-header"><span class="card-title">Compliance by Safety Category</span></div>
+        <div class="card-body">
+          <div style="height:280px"><canvas id="categoryChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Recent Reports -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Recent Submissions</span>
+          <a href="/insurance/reports.html" class="btn btn-outline btn-sm">View All</a>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Site Name</th>
+                <th>Type</th>
+                <th>Inspector</th>
+                <th>Date</th>
+                <th>Score</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="recentTable"><tr><td colspan="8" style="text-align:center;padding:40px;color:#64748b">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+(async () => {
+  const user = API.requireAuth('insurance');
+  if (!user) return;
+  populateSidebar(user);
+
+  try {
+    const data = await API.get('/api/insurance/dashboard');
+    const { stats, avgScore, recentReports, scoresByCategory, submissionsOverTime } = data;
+
+    document.getElementById('statTotal').textContent = stats.total;
+    const pending = stats.submitted;
+    document.getElementById('statPending').textContent = pending;
+    document.getElementById('statUnderReview').textContent = stats.under_review;
+    document.getElementById('statApproved').textContent = stats.approved;
+    document.getElementById('statRejected').textContent = stats.rejected;
+    document.getElementById('statAvgScore').textContent = `${avgScore}%`;
+
+    if (pending > 0) {
+      const badge = document.getElementById('pendingBadge');
+      badge.style.display = 'inline';
+      badge.textContent = pending;
+    }
+
+    // Status doughnut chart
+    new Chart(document.getElementById('statusChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Submitted', 'Under Review', 'Approved', 'Rejected'],
+        datasets: [{
+          data: [stats.submitted, stats.under_review, stats.approved, stats.rejected],
+          backgroundColor: ['#3b82f6', '#f59e0b', '#16a34a', '#dc2626'],
+          borderWidth: 2, borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'right', labels: { padding: 16, font: { size: 12 } } }
+        }
+      }
+    });
+
+    // Submissions over time bar chart
+    new Chart(document.getElementById('timeChart'), {
+      type: 'bar',
+      data: {
+        labels: submissionsOverTime.map(r => r.month),
+        datasets: [{
+          label: 'Submissions',
+          data: submissionsOverTime.map(r => r.count),
+          backgroundColor: '#2563eb', borderRadius: 5
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f1f5f9' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+
+    // Category compliance horizontal bar
+    const catData = scoresByCategory.filter(c => c.applicable > 0).map(c => ({
+      label: c.category,
+      pct: Math.round((c.compliant / c.applicable) * 100)
+    }));
+
+    new Chart(document.getElementById('categoryChart'), {
+      type: 'bar',
+      data: {
+        labels: catData.map(c => c.label),
+        datasets: [{
+          label: 'Compliance %',
+          data: catData.map(c => c.pct),
+          backgroundColor: catData.map(c => c.pct >= 80 ? '#16a34a' : c.pct >= 60 ? '#f59e0b' : '#dc2626'),
+          borderRadius: 5
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { min: 0, max: 100, grid: { color: '#f1f5f9' }, ticks: { callback: v => `${v}%` } },
+          y: { grid: { display: false }, ticks: { font: { size: 12 } } }
+        }
+      }
+    });
+
+    // Recent reports table
+    const tbody = document.getElementById('recentTable');
+    if (recentReports.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#64748b">No reports received yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = recentReports.map(r => `
+      <tr>
+        <td class="text-muted text-sm">#${r.id}</td>
+        <td>
+          <div class="font-bold">${r.site_name}</div>
+          <div class="text-muted text-sm">${r.site_type || ''}</div>
+        </td>
+        <td class="text-muted">${r.site_type || '—'}</td>
+        <td>
+          <div>${r.inspector_name}</div>
+          <div class="text-muted text-sm">${r.inspector_company || ''}</div>
+        </td>
+        <td class="text-muted">${r.inspection_date}</td>
+        <td>${scoreRing(r.score, r.max_score)}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td>
+          <a href="/insurance/report-detail.html?id=${r.id}" class="btn btn-primary btn-sm">Review</a>
+        </td>
+      </tr>
+    `).join('');
+
+  } catch (err) {
+    document.querySelector('.content-area').insertAdjacentHTML('afterbegin',
+      `<div class="alert alert-error">Failed to load dashboard: ${err.message}</div>`);
+  }
+})();
+</script>
+</body>
+</html>
