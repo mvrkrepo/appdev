@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Inspection — SafeInspect</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="brand-text"><div class="brand-name">SafeInspect</div><div class="brand-sub">Inspector Portal</div></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Navigation</div>
+      <a href="/inspector/dashboard.html" class="nav-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="/inspector/new-report.html" class="nav-item active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Inspection
+      </a>
+      <a href="/inspector/my-reports.html" class="nav-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        My Reports
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sidebarAvatar">?</div>
+        <div class="user-info-text">
+          <div class="user-name" id="sidebarUserName">Loading…</div>
+          <div class="user-role" id="sidebarUserRole">Inspector</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="API.logout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <span class="page-title" id="pageTitle">New Inspection Report</span>
+      <div class="top-bar-actions" id="topBarActions">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <div class="content-area">
+      <div id="alertBox"></div>
+
+      <!-- Read-only banner for submitted reports -->
+      <div id="readOnlyBanner" class="alert alert-info hidden">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        This report has been submitted and cannot be edited.
+      </div>
+
+      <!-- Insurance feedback banner -->
+      <div id="insuranceFeedback" class="hidden"></div>
+
+      <!-- Site Information -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="form-section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Site Information
+          </span>
+        </div>
+        <div class="form-section-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Site / Facility Name <span style="color:var(--red)">*</span></label>
+              <input type="text" id="siteName" class="form-control" placeholder="e.g. Metro Steel Plant">
+            </div>
+            <div class="form-group">
+              <label>Site Type</label>
+              <select id="siteType" class="form-control">
+                <option value="">— Select type —</option>
+                <option>Manufacturing</option>
+                <option>Construction</option>
+                <option>Warehouse</option>
+                <option>Office</option>
+                <option>Food Processing</option>
+                <option>Retail</option>
+                <option>Healthcare</option>
+                <option>Education</option>
+                <option>Mining</option>
+                <option>Chemical Plant</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group form-full">
+              <label>Site Address <span style="color:var(--red)">*</span></label>
+              <input type="text" id="siteAddress" class="form-control" placeholder="Street address, City, State, ZIP">
+            </div>
+            <div class="form-group">
+              <label>Inspection Date <span style="color:var(--red)">*</span></label>
+              <input type="date" id="inspectionDate" class="form-control">
+            </div>
+            <div class="form-group form-full">
+              <label>Inspector Notes</label>
+              <textarea id="inspectorNotes" class="form-control" rows="3" placeholder="General observations, context, or remarks…"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overall Progress -->
+      <div class="form-section" id="progressSection">
+        <div class="form-section-header">
+          <span class="form-section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Overall Compliance Score
+          </span>
+          <span id="overallScore" style="font-size:20px;font-weight:800;color:var(--navy)">0%</span>
+        </div>
+        <div class="form-section-body" style="padding:12px 20px">
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill green" id="overallBar" style="width:0%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px">
+            <span class="text-muted text-sm" id="scoreDetail">0 compliant of 0 applicable items</span>
+            <span class="text-muted text-sm" id="naCount">0 N/A</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Checklist -->
+      <div id="checklistContainer"></div>
+
+      <!-- Photo Upload -->
+      <div class="form-section" id="photoSection">
+        <div class="form-section-header">
+          <span class="form-section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Photographic Evidence
+          </span>
+          <span class="text-muted text-sm">JPEG / PNG / WebP · Max 10 MB each</span>
+        </div>
+        <div class="form-section-body">
+          <div id="photoUploadArea" class="photo-dropzone">
+            <input type="file" id="photoInput" accept="image/*" multiple>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-muted);margin-bottom:10px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <p style="color:var(--text-muted);margin:0;font-size:13.5px"><strong>Click to upload</strong> or drag photos here</p>
+            <p class="text-muted text-sm" style="margin-top:4px">Up to 10 photos per upload</p>
+          </div>
+          <div class="photo-grid" id="photoGrid"></div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div id="actionButtons" style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+        <a href="/inspector/my-reports.html" class="btn btn-outline">Cancel</a>
+        <button id="saveDraftBtn" class="btn btn-outline" onclick="saveReport('draft')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save Draft
+        </button>
+        <button id="submitBtn" class="btn btn-primary" onclick="saveReport('submit')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Save &amp; Submit to Insurance
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="/js/api.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const reportId = params.get('id');
+let isReadOnly = false;
+let existingReport = null;
+let checklist = [];
+
+(async () => {
+  const user = API.requireAuth('inspector');
+  if (!user) return;
+  populateSidebar(user);
+
+  // Set today's date as default
+  document.getElementById('inspectionDate').value = new Date().toISOString().split('T')[0];
+
+  // Load checklist
+  checklist = await API.get('/api/checklist');
+
+  if (reportId) {
+    await loadExistingReport();
+  }
+
+  renderChecklist();
+  setupPhotoUpload();
+})();
+
+async function loadExistingReport() {
+  try {
+    existingReport = await API.get(`/api/reports/${reportId}`);
+    document.getElementById('pageTitle').textContent = `Inspection Report #${reportId}`;
+    document.getElementById('siteName').value = existingReport.site_name;
+    document.getElementById('siteAddress').value = existingReport.site_address;
+    document.getElementById('siteType').value = existingReport.site_type || '';
+    document.getElementById('inspectionDate').value = existingReport.inspection_date;
+    document.getElementById('inspectorNotes').value = existingReport.notes || '';
+
+    if (existingReport.status !== 'draft') {
+      isReadOnly = true;
+      setReadOnly();
+    }
+
+    if (existingReport.status === 'approved') {
+      document.getElementById('insuranceFeedback').innerHTML = `
+        <div class="review-panel approved" style="margin-bottom:16px">
+          <div class="review-panel-header">✓ Approved by ${existingReport.reviewer_name || 'Insurance Provider'}</div>
+          <div class="review-panel-body">
+            ${existingReport.insurance_notes ? `<p style="font-size:13.5px">${existingReport.insurance_notes}</p>` : '<p class="text-muted text-sm">No additional notes.</p>'}
+          </div>
+        </div>`;
+      document.getElementById('insuranceFeedback').classList.remove('hidden');
+    }
+
+    if (existingReport.status === 'rejected') {
+      document.getElementById('insuranceFeedback').innerHTML = `
+        <div class="review-panel rejected" style="margin-bottom:16px">
+          <div class="review-panel-header">✗ Rejected by ${existingReport.reviewer_name || 'Insurance Provider'}</div>
+          <div class="review-panel-body">
+            ${existingReport.insurance_notes ? `<p style="font-size:13.5px">${existingReport.insurance_notes}</p>` : '<p class="text-muted text-sm">No additional notes.</p>'}
+            <p class="text-muted text-sm" style="margin-top:8px">Please address the issues and submit a new inspection report.</p>
+          </div>
+        </div>`;
+      document.getElementById('insuranceFeedback').classList.remove('hidden');
+    }
+
+    if (existingReport.status === 'under_review') {
+      document.getElementById('insuranceFeedback').innerHTML = `
+        <div class="review-panel under_review" style="margin-bottom:16px">
+          <div class="review-panel-header">⏳ Under review by insurance provider</div>
+          <div class="review-panel-body"><p class="text-muted text-sm">Your report is being reviewed. You will be notified once a decision is made.</p></div>
+        </div>`;
+      document.getElementById('insuranceFeedback').classList.remove('hidden');
+    }
+
+    // Load existing photos
+    renderExistingPhotos(existingReport.photos || []);
+
+    // Top bar PDF button
+    document.getElementById('topBarActions').innerHTML = `
+      <a href="/api/reports/${reportId}/pdf" class="btn btn-outline" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Download PDF
+      </a>
+    `;
+  } catch (err) {
+    document.getElementById('alertBox').innerHTML = `<div class="alert alert-error">Failed to load report: ${err.message}</div>`;
+  }
+}
+
+function setReadOnly() {
+  document.getElementById('readOnlyBanner').classList.remove('hidden');
+  document.getElementById('actionButtons').style.display = 'none';
+  document.getElementById('photoUploadArea').style.display = 'none';
+  ['siteName','siteAddress','siteType','inspectionDate','inspectorNotes'].forEach(id => {
+    const el = document.getElementById(id);
+    el.setAttribute('readonly', true);
+    el.setAttribute('disabled', true);
+    el.style.background = '#f8fafc';
+  });
+}
+
+function renderChecklist() {
+  const container = document.getElementById('checklistContainer');
+  container.innerHTML = '';
+
+  checklist.forEach(section => {
+    const safeId = section.category.replace(/\W+/g, '-');
+    const div = document.createElement('div');
+    div.className = 'form-section';
+    div.innerHTML = `
+      <div class="form-section-header checklist-cat-header" onclick="toggleSection('${safeId}')">
+        <span class="form-section-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          ${section.category}
+        </span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="cat-score-pill" id="catScore-${safeId}">0 / 0</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="chevron-${safeId}" style="transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="checklist-items-list" id="catItems-${safeId}">
+        ${section.items.map((item, i) => renderChecklistItem(section.category, item, i, safeId)).join('')}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  // Pre-fill existing items
+  if (existingReport && existingReport.items) {
+    existingReport.items.forEach(dbItem => {
+      const safeId = dbItem.category.replace(/\W+/g, '-');
+      const itemIdx = checklist
+        .find(s => s.category === dbItem.category)?.items.indexOf(dbItem.item_name);
+      if (itemIdx !== undefined && itemIdx >= 0) {
+        const radio = document.querySelector(`input[name="item_${safeId}_${itemIdx}"][value="${dbItem.status}"]`);
+        if (radio) radio.checked = true;
+        const notesEl = document.getElementById(`notes_${safeId}_${itemIdx}`);
+        if (notesEl && dbItem.notes) notesEl.value = dbItem.notes;
+      }
+    });
+  }
+
+  // Disable radios if read-only
+  if (isReadOnly) {
+    document.querySelectorAll('.checklist-items-list input').forEach(el => el.setAttribute('disabled', true));
+    document.querySelectorAll('.item-notes-input').forEach(el => el.setAttribute('disabled', true));
+  }
+
+  updateAllScores();
+}
+
+function renderChecklistItem(category, item, i, safeId) {
+  return `
+    <div class="checklist-item">
+      <div class="checklist-item-row">
+        <span class="item-name">${item}</span>
+        <div class="radio-group">
+          <label class="radio-option compliant">
+            <input type="radio" name="item_${safeId}_${i}" value="compliant" onchange="updateCategoryScore('${safeId}')">
+            ✓ Compliant
+          </label>
+          <label class="radio-option non_compliant">
+            <input type="radio" name="item_${safeId}_${i}" value="non_compliant" onchange="updateCategoryScore('${safeId}')">
+            ✗ Non-Compliant
+          </label>
+          <label class="radio-option na" style="">
+            <input type="radio" name="item_${safeId}_${i}" value="na" checked onchange="updateCategoryScore('${safeId}')">
+            — N/A
+          </label>
+        </div>
+      </div>
+      <input type="text" class="item-notes-input" id="notes_${safeId}_${i}" placeholder="Notes (optional)…">
+    </div>
+  `;
+}
+
+function toggleSection(safeId) {
+  const items = document.getElementById(`catItems-${safeId}`);
+  const chevron = document.getElementById(`chevron-${safeId}`);
+  const isHidden = items.style.display === 'none';
+  items.style.display = isHidden ? '' : 'none';
+  chevron.style.transform = isHidden ? '' : 'rotate(-90deg)';
+}
+
+function updateCategoryScore(safeId) {
+  const section = checklist.find(s => s.category.replace(/\W+/g, '-') === safeId);
+  if (!section) return;
+  let compliant = 0, applicable = 0;
+  section.items.forEach((_, i) => {
+    const val = document.querySelector(`input[name="item_${safeId}_${i}"]:checked`)?.value;
+    if (val && val !== 'na') {
+      applicable++;
+      if (val === 'compliant') compliant++;
+    }
+  });
+  const pct = applicable > 0 ? Math.round((compliant / applicable) * 100) : 0;
+  const pill = document.getElementById(`catScore-${safeId}`);
+  if (pill) {
+    pill.textContent = `${compliant} / ${applicable}`;
+    pill.className = 'cat-score-pill' + (applicable === 0 ? '' : pct >= 80 ? ' high' : pct >= 60 ? ' mid' : ' low');
+  }
+  updateOverallScore();
+}
+
+function updateAllScores() {
+  checklist.forEach(s => updateCategoryScore(s.category.replace(/\W+/g, '-')));
+}
+
+function updateOverallScore() {
+  let totalCompliant = 0, totalApplicable = 0, totalNA = 0;
+  checklist.forEach(section => {
+    const safeId = section.category.replace(/\W+/g, '-');
+    section.items.forEach((_, i) => {
+      const val = document.querySelector(`input[name="item_${safeId}_${i}"]:checked`)?.value;
+      if (val === 'na') totalNA++;
+      else if (val) {
+        totalApplicable++;
+        if (val === 'compliant') totalCompliant++;
+      }
+    });
+  });
+  const pct = totalApplicable > 0 ? Math.round((totalCompliant / totalApplicable) * 100) : 0;
+  document.getElementById('overallScore').textContent = `${pct}%`;
+  document.getElementById('scoreDetail').textContent = `${totalCompliant} compliant of ${totalApplicable} applicable items`;
+  document.getElementById('naCount').textContent = `${totalNA} N/A`;
+  const bar = document.getElementById('overallBar');
+  bar.style.width = `${pct}%`;
+  bar.className = 'progress-bar-fill ' + (pct >= 80 ? 'green' : pct >= 60 ? 'amber' : 'red');
+  document.getElementById('overallScore').style.color = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : pct > 0 ? 'var(--red)' : 'var(--navy)';
+}
+
+function collectItems() {
+  const items = [];
+  checklist.forEach(section => {
+    const safeId = section.category.replace(/\W+/g, '-');
+    section.items.forEach((itemName, i) => {
+      const status = document.querySelector(`input[name="item_${safeId}_${i}"]:checked`)?.value || 'na';
+      const notes = document.getElementById(`notes_${safeId}_${i}`)?.value || '';
+      items.push({ category: section.category, item_name: itemName, status, notes });
+    });
+  });
+  return items;
+}
+
+async function saveReport(action) {
+  const siteName = document.getElementById('siteName').value.trim();
+  const siteAddress = document.getElementById('siteAddress').value.trim();
+  const inspectionDate = document.getElementById('inspectionDate').value;
+
+  if (!siteName || !siteAddress || !inspectionDate) {
+    document.getElementById('alertBox').innerHTML = '<div class="alert alert-error">Site name, address, and inspection date are required.</div>';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  document.getElementById('alertBox').innerHTML = '';
+  const btn = action === 'draft' ? document.getElementById('saveDraftBtn') : document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="inline-spinner"></span> Saving…';
+
+  const payload = {
+    site_name: siteName,
+    site_address: siteAddress,
+    site_type: document.getElementById('siteType').value,
+    inspection_date: inspectionDate,
+    notes: document.getElementById('inspectorNotes').value.trim(),
+    items: collectItems()
+  };
+
+  try {
+    let id = reportId;
+    if (!id) {
+      const result = await API.post('/api/reports', payload);
+      id = result.id;
+    } else {
+      await API.put(`/api/reports/${id}`, payload);
+    }
+
+    // Upload pending photos
+    await uploadPendingPhotos(id);
+
+    if (action === 'submit') {
+      await API.post(`/api/reports/${id}/submit`);
+      toast('Report submitted to insurance provider!', 'success');
+      setTimeout(() => window.location.href = '/inspector/my-reports.html', 1200);
+    } else {
+      toast('Draft saved successfully.', 'success');
+      if (!reportId) {
+        setTimeout(() => window.location.href = `/inspector/new-report.html?id=${id}`, 800);
+      }
+    }
+  } catch (err) {
+    document.getElementById('alertBox').innerHTML = `<div class="alert alert-error">⚠ ${err.message}</div>`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = action === 'draft' ? 'Save Draft' : 'Save &amp; Submit to Insurance';
+  }
+}
+
+// ---- Photo upload ----
+let pendingPhotos = [];
+
+function setupPhotoUpload() {
+  const dropzone = document.getElementById('photoUploadArea');
+  const input = document.getElementById('photoInput');
+
+  dropzone.addEventListener('click', () => input.click());
+  input.addEventListener('change', e => addPhotos(e.target.files));
+
+  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+  dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('drag-over');
+    addPhotos(e.dataTransfer.files);
+  });
+}
+
+function addPhotos(files) {
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      pendingPhotos.push({ file, dataUrl: e.target.result });
+      renderPendingPhotos();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderExistingPhotos(photos) {
+  const grid = document.getElementById('photoGrid');
+  photos.forEach(photo => {
+    const div = document.createElement('div');
+    div.className = 'photo-thumb';
+    div.dataset.existingId = photo.id;
+    div.innerHTML = `
+      <img src="/uploads/${photo.filename}" alt="${photo.original_name}">
+      <div class="photo-caption">${photo.caption || photo.original_name}</div>
+      ${!isReadOnly ? `<button class="photo-delete" onclick="deletePhoto(${photo.id}, this.closest('.photo-thumb'))" title="Remove">✕</button>` : ''}
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function renderPendingPhotos() {
+  const grid = document.getElementById('photoGrid');
+  // Remove previously pending thumbs
+  grid.querySelectorAll('[data-pending]').forEach(el => el.remove());
+
+  pendingPhotos.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'photo-thumb';
+    div.dataset.pending = i;
+    div.innerHTML = `
+      <img src="${p.dataUrl}" alt="${p.file.name}">
+      <input type="text" class="photo-caption" style="width:100%;padding:4px 8px;border:none;border-top:1px solid var(--border);font-size:11.5px;outline:none" placeholder="Caption…" onchange="pendingPhotos[${i}].caption = this.value">
+      <button class="photo-delete" onclick="removePending(${i})" title="Remove">✕</button>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function removePending(i) {
+  pendingPhotos.splice(i, 1);
+  renderPendingPhotos();
+}
+
+async function deletePhoto(photoId, el) {
+  if (!confirm('Remove this photo?')) return;
+  try {
+    await API.del(`/api/reports/${reportId}/photos/${photoId}`);
+    el.remove();
+    toast('Photo removed.', 'info');
+  } catch (err) {
+    toast(err.message, 'error');
+  }
+}
+
+async function uploadPendingPhotos(id) {
+  if (pendingPhotos.length === 0) return;
+  const form = new FormData();
+  pendingPhotos.forEach(p => {
+    form.append('photos', p.file);
+    form.append('captions', p.caption || '');
+  });
+  await API.upload(`/api/reports/${id}/photos`, form);
+  pendingPhotos = [];
+  document.getElementById('photoGrid').querySelectorAll('[data-pending]').forEach(el => el.remove());
+}
+</script>
+</body>
+</html>

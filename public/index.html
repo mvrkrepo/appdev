@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeInspect — Login</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="login-page">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <polyline points="9 12 11 14 15 10"/>
+        </svg>
+      </div>
+      <h1>SafeInspect</h1>
+      <p>Workplace Safety Inspection Platform</p>
+    </div>
+
+    <div id="alertBox"></div>
+
+    <form id="loginForm" novalidate>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" class="form-control" placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+        Sign In
+      </button>
+    </form>
+
+    <div class="demo-credentials">
+      <strong>Demo Credentials</strong>
+      Inspector: inspector@demo.com / password123<br>
+      Inspector: inspector2@demo.com / password123<br>
+      Insurance: insurance@demo.com / password123
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+  // Redirect if already logged in
+  if (API.getToken() && API.getUser()) {
+    const u = API.getUser();
+    window.location.href = u.role === 'inspector' ? '/inspector/dashboard.html' : '/insurance/dashboard.html';
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const alertBox = document.getElementById('alertBox');
+    alertBox.innerHTML = '';
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    if (!email || !password) {
+      alertBox.innerHTML = '<div class="alert alert-error">Please enter your email and password.</div>';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="inline-spinner"></span> Signing in…';
+
+    try {
+      const data = await API.post('/api/auth/login', { email, password });
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('auth_user', JSON.stringify(data.user));
+      window.location.href = data.user.role === 'inspector'
+        ? '/inspector/dashboard.html'
+        : '/insurance/dashboard.html';
+    } catch (err) {
+      alertBox.innerHTML = `<div class="alert alert-error">⚠ ${err.message}</div>`;
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    }
+  });
+</script>
+</body>
+</html>
